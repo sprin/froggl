@@ -47,7 +47,7 @@ $(document).ready( function() {
   window.TimeEntryView = Backbone.View.extend({
 
     // Represent as a list tag.
-    tagName: "li",
+    tagName: "tr",
 
     // Cache the template for a single old **TimeEntry**.
     template: _.template($('#time-entry-template').html()),
@@ -142,19 +142,36 @@ $(document).ready( function() {
           text: text,
         });
         this.currentTimeEntry.start();
-        // Change the value of the toggle button to stop.
-        this.toggle.val('Stop');
+        // Change the UI state of the toggle button to stop.
+        this.setButton('stop');
         // Show the destroy element.
         this.destroyElement.show();
-        // Start the timer to update the duration element.
+        // Set the initial duration value and start the timer to 
+        // continue to update the duration element every second.
+        this.currentDuration.val('0 sec');
         this.timer = setInterval("App.updateDuration()",1000);
       }
     },
 
+    // Set the UI state of the button.
+    setButton: function(state) {
+      if (state === 'start') {
+        this.toggle.text('Start');
+        this.toggle.removeClass('btn-inverse');
+        this.toggle.addClass('btn-success');
+
+      } else if (state === 'stop') {
+        this.toggle.text('Stop');
+        this.toggle.removeClass('btn-success');
+        this.toggle.addClass('btn-inverse');
+      }
+    },
+
+
     // Toggl the start and stop of the time entry.
     toggleTime: function() {
       console.log('entering AppView.toggleTime');
-      if (this.toggle.val() === 'Start') {
+      if (this.toggle.text() === 'Start') {
         this.create();
       } else {
         this.currentTimeEntry.end();
@@ -194,7 +211,7 @@ $(document).ready( function() {
       this.clearTimer();
       this.input.val('');
       this.currentDuration.val('');
-      this.toggle.val('Start');
+      this.setButton('start');
       this.currentTimeEntry = null;
     },
 

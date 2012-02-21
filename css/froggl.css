@@ -1,0 +1,17 @@
+h1 {
+  padding-bottom: 1em;
+}
+input, textarea {
+  width: 100%;
+}
+#new-time-entry-duration {
+  text-align: right;
+}
+.icon-container {
+  position: absolute;
+  bottom: 8px;
+  padding-left: 8px;
+}
+section {
+  position: relative;
+}

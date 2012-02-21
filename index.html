@@ -1,41 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <title>froggl</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap styles -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- froggl styles -->
+    <link href="css/froggl.css" rel="stylesheet">
+    <!-- Vendor javascript -->
     <script src="js/jquery-1.7.1.min.js"></script>
 		<script src="js/underscore-min.js"></script>
     <script src="js/backbone-min.js"></script>
     <script src="js/moment.min.js"></script>
+    <!-- froggl javascript -->
     <script src="js/froggl.js"></script>
   </head>
   <body>
-		<div id="froggl-app">
+		<div id="froggl-app" class="container">
 			<div class="title">
     		<h1>froggl</h1>
 			</div>
 
-      <div class="content">
-        <div id="new-time-entry">
-          <input id="new-time-entry-text" placeholder="gather ye rosebuds while ye may" type="text" />
-          <input id="new-time-entry-duration" type="text" />
-          <input id="new-time-entry-button" value="Start" type="submit" />
-          <span id="new-time-entry-destroy"><a href="javascript:void(0)">destroy</a></span>
-        </div>
-        <div id="old-time-entries">
-          <ul id="time-entry-list">
-          </ul>
+      <div class="content row">
+        <div class="span10 offset1">
+          <section>
+            <div id="new-time-entry" class="row">
+              <div class="span7">
+                <input id="new-time-entry-text" placeholder="gather ye rosebuds while ye may" type="text" />
+              </div>
+              <div class="span1">
+                <input id="new-time-entry-duration" type="text" />
+              </div>
+              <div class="span1">
+                <button id="new-time-entry-button" class="btn btn-success">Start</button>
+                <span class="icon-container"><i id="new-time-entry-destroy" class="icon-trash"></i></span>
+              </div>
+            </div>
+          </section>
+          <div id="old-time-entries" class="span8">
+            <table id="time-entry-list" class="table table-striped">
+              <thead>
+                <tr>
+                  <th><div class="span6"></div></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+            </table>
+          </div>
         </div>
 			</div>
 		</div>
 		<script id="time-entry-template" type="text/template">
-			<div class="time-entry">
-				<div class="display">
-          <span class="time-entry-text"></span>&nbsp;&nbsp;
-          <span class="time-entry-duration"></span>&nbsp;&nbsp;
-          <span class="old-time-entry-destroy"><a href="javascript:void(0)">destroy</a></span>
-				</div>
-			</div>
+          <td class="time-entry-text"></td>
+          <td class="time-entry-duration"></td>
+          <td><i class="old-time-entry-destroy icon-trash"></i></td>
 		</script>
   </body>
 </html>
