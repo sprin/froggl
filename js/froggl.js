@@ -6,7 +6,8 @@
 // The current duration is displayed next to the text.
 // A time entry is ended when Stop is clicked. The end time is 
 // recorded and used to compute the duration. Finished time 
-// entries are displayed in a list. Both the currently runnning 
+// entries are displayed in a table. Finished time entries are 
+// persisted using *localStorage*. Both the currently runnning 
 // time entry and the finished ones can be destroyed.
 
 // Load application when DOM is ready.
@@ -19,7 +20,8 @@ $(document).ready( function() {
   // `duration` attributes.
   window.TimeEntry = Backbone.Model.extend({
 
-    // Start the **TimeEntry**.
+    // Start the **TimeEntry** by instantiating a `moment` instance
+    // with the current date and time. 
     start: function() {
       this.set('timeStart', moment());
     },
@@ -36,9 +38,31 @@ $(document).ready( function() {
       duration = this.get('timeEnd').diff(
         this.get('timeStart'), 'seconds');
       this.set('duration', duration);
-    }
+    },
 
   });
+
+  // TimeEntry Collection
+  // --------------------
+
+  // This collection is persisted in *localStorage*.
+  window.TimeEntryList = Backbone.Collection.extend({
+
+    //This collection's model:
+    model: TimeEntry,
+
+    // Save to the `"timeEntries"` namespace.
+    localStorage: new Store("timeEntries"),
+
+    // Time entries are sorted by their `start` moment.
+    comparator: function(timeEntry) {
+      return timeEntry.get('start');
+    },
+
+  });
+
+  // Create the singleton `TimeEntryList`.
+  window.TimeEntries = new TimeEntryList;
 
   // Time Entry View
   // ---------------
@@ -67,7 +91,6 @@ $(document).ready( function() {
 
     // Render the view.
     render: function() {
-      console.log('entering TimeEntryView.render');
       // Get the template html.
       $(this.el).html(this.template(this.model.toJSON()));
       this.renderText();
@@ -117,8 +140,12 @@ $(document).ready( function() {
 
     // Make initial DOM changes and cache jQuery selections.
     initialize: function() {
-      console.log('AppView.initialize');
-      this.destroyElement = this.$("#new-time-entry-destroy").hide();
+      TimeEntries.bind('add', this.addEntry, this);
+      TimeEntries.bind('reset', this.addAllEntries, this);
+
+      TimeEntries.fetch();
+
+      this.destroyIcon = this.$("#new-time-entry-destroy").hide();
       this.input = this.$("#new-time-entry-text");
       this.toggle = this.$("#new-time-entry-button");
       this.currentDuration = this.$('#new-time-entry-duration');
@@ -127,7 +154,6 @@ $(document).ready( function() {
     // Create a new time entry if ENTER is pressed in the text and 
     // if time is not already running.
     createOnEnter: function(e) {
-      console.log('entering AppView.createOnEnter');
       if (e.keyCode === 13 && !(this.currentTimeEntry)) {
         this.create();
       }
@@ -135,7 +161,6 @@ $(document).ready( function() {
 
     // Create new **TimeEntry** model object if there is text.
     create: function() {
-      console.log('entering AppView.create');
       var text = this.input.val();
       if (text) {
         this.currentTimeEntry = new TimeEntry({
@@ -144,8 +169,8 @@ $(document).ready( function() {
         this.currentTimeEntry.start();
         // Change the UI state of the toggle button to stop.
         this.setButton('stop');
-        // Show the destroy element.
-        this.destroyElement.show();
+        // Show the destroy icon.
+        this.destroyIcon.show();
         // Set the initial duration value and start the timer to 
         // continue to update the duration element every second.
         this.currentDuration.val('0 sec');
@@ -170,25 +195,30 @@ $(document).ready( function() {
 
     // Toggl the start and stop of the time entry.
     toggleTime: function() {
-      console.log('entering AppView.toggleTime');
       if (this.toggle.text() === 'Start') {
         this.create();
       } else {
         this.currentTimeEntry.end();
-        this.addOne(this.currentTimeEntry);
+        TimeEntries.add(this.currentTimeEntry);
+        this.currentTimeEntry.save();
         this.clear();
       }
     },
 
-    // Add the time entry to the list of old entries.
-    addOne: function(timeEntry) {
+    // Add the time entry to the table of old entries.
+    addEntry: function(timeEntry) {
       var view = new TimeEntryView({model: timeEntry});
       $("#time-entry-list").prepend(view.render().el);
+    },
+
+    // Add all time entries in the collection to the table at once.
+    addAllEntries: function() {
+      TimeEntries.each(this.addEntry);
     },
     
     // Destroy the current time entry and reset UI elements.
     destroy: function() {
-      this.destroyElement.hide();
+      this.destroyIcon.hide();
       if (this.currentTimeEntry) {
         this.currentTimeEntry.destroy();
       } else {
